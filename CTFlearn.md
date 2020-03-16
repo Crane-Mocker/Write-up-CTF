@@ -164,3 +164,111 @@ According to the messages, we could find the second version should be the one we
 By the way, you can also use `HEAD^` to reset the last version. Because HEAD means the version now, ^ means one version before it.(HEAD^^ is the one before the former one.)
 
 Then you can `cat flag.txt` and get the flag.
+
+## Cryptography 
+
+### Character Encoding
+
+*easy*
+
+Discription:
+In the computing industry, standards are established to facilitate information interchanges among American coders. Unfortunately, I've made communication a little bit more difficult. Can you figure this one out? 41 42 43 54 46 7B 34 35 43 31 31 5F 31 35 5F 55 35 33 46 55 4C 7D
+
+Hex to ascii.
+
+### Hextroadinary
+
+*easy*
+
+Discription:
+Meet ROXy, a coder obsessed with being exclusively the worlds best hacker. She specializes in short cryptic hard to decipher secret codes. The below hex values for example, she did something with them to generate a secret code, can you figure out what? Your answer should start with 0x.
+`0xc4115 0x4cf8`
+
+ROXy means xor. So let's calculate xor and we can get `c0ded`
+So `0xc0ded` is the flag.
+
+### Base 2 2 the 6
+
+*easy*
+
+Discription:
+There are so many different ways of encoding and decoding information nowadays... One of them will work! Q1RGe0ZsYWdneVdhZ2d5UmFnZ3l9
+
+As the hint goes, just base64
+
+### BruXOR
+
+*easy*
+
+Discription:
+There is a technique called bruteforce. Message: q{vpln'bH_varHuebcrqxetrHOXEj No key! Just brute .. brute .. brute ... :D
+
+As you can see, no key, just brute and xor. But before that we have to turn the string into hex at first.
+
+Then `xortool -x -b xor.hex`
+And `cat xx.out` one by one you can find the flag.
+
+### Reverse Polarity
+
+*easy*
+
+Discription:
+I got a new hard drive just to hold my flag, but I'm afraid that it rotted. What do I do? The only thing I could get off of it was this: 01000011010101000100011001111011010000100110100101110100010111110100011001101100011010010111000001110000011010010110111001111101
+
+Binary to ascii.
+
+### Vigenere Cipher
+
+*easy*
+
+Discription:
+The vignere cipher is a method of encrypting alphabetic text by using a series of interwoven Caesar ciphers based on the letters of a keyword.
+I’m not sure what this means, but it was left lying around: blorpy
+gwox{RgqssihYspOntqpxs}
+
+vigenere cipher, the key is blorpy, and the ciphertext is gwox{RgqssihYspOntqpxs}
+
+### Morse Code
+
+*easy*
+
+..-. .-.. .- --. ... .- -- ..- . .-.. -- --- .-. ... . .. ... -.-. --- --- .-.. -... -.-- - .... . .-- .- -.-- .. .-.. .. -.- . -.-. .... . . ...
+
+Just Morse code, I recommand this [website](https://www.jb51.net/tools/morse.htm).
+
+### HyperStream Test #2
+
+*easy*
+
+Discription:
+I love the smell of bacon in the morning! ABAAAABABAABBABBAABBAABAAAAAABAAAAAAAABAABBABABBAAAAABBABBABABBAABAABABABBAABBABBAABB
+
+As the hint goes, Bacon's chiper.
+
+## Web
+
+### Basic Injection
+*easy*
+
+Discription:
+See if you can leak the whole database. The flag is in there somwhere… https://web.ctflearn.com/web4/
+
+When we open the url, we can see "You know what to do" as the headline. Press "F12" to check the code. Then we can see the hint
+`<!-- Try some names like Hiroki, Noah, Luke -->`
+
+So let's try `Luke`. And we find that we need to inject.
+So an easy payload is `Luke' or '1'='1`
+And you can find the flag.
+
+## Binary
+
+### Lazy Game Challenge
+
+*easy*
+
+Discription:
+I found an interesting game made by some guy named "John_123". It is some betting game. I made some small fixes to the game; see if you can still pwn this and steal $1000000 from me!
+
+To get flag, pwn the server at `nc thekidofarcrania.com 10001`
+
+The key point is that it's hard to win, so when you place a bet, input a negative number (for example: -1000000000) and then you can loose the game as you like it. Each time you loose a game, you gain some money. And when the game ends, you will get the flag.
