@@ -1,6 +1,51 @@
 # 流量分析
 
-[TOC]
+
+<!-- vim-markdown-toc GitLab -->
+
+* [文件头尾总结](#文件头尾总结)
+* [Q0](#q0)
+* [Q1](#q1)
+* [Q2](#q2)
+* [Q3](#q3)
+* [Q4](#q4)
+
+<!-- vim-markdown-toc -->
+
+## 文件头尾总结
+
+|archive|头|尾|
+|---|---|---|
+|JPEG (jpg)|FF D8 FF|FF D9　　　　　　　　　　　　　　　
+|PNG (png)|89 50 4E 47|AE 42 60 82
+|GIF (gif)|47 49 46 38|00 3B
+|ZIP Archive (zip)|50 4B 03 04|50 4B
+|TIFF (tif)|49 49 2A 00|
+|Windows Bitmap (bmp)|42 4D|
+|CAD (dwg)|41 43 31 30|
+|Adobe Photoshop (psd)|38 42 50 53|
+|Rich Text Format (rtf)|7B 5C 72 74 66|
+|XML (xml)|3C 3F 78 6D 6C|
+|HTML (html)|68 74 6D 6C 3E|
+|Email [thorough only] (eml)|44 65 6C 69 76 65 72 79 2D 64 61 74 65 3A|
+|Outlook Express (dbx)|CF AD 12 FE C5 FD 74 6F|
+|Outlook (pst)|21 42 44 4E|
+|MS Word/Excel (xls.or.doc)|D0 CF 11 E0|
+|MS Access (mdb)|53 74 61 6E 64 61 72 64 20 4A|
+|WordPerfect (wpd)|FF 57 50 43|
+|Adobe Acrobat (pdf)|25 50 44 46 2D 31 2E|
+|Quicken (qdf)|AC 9E BD 8F|
+|Windows Password (pwl)|E3 82 85 96|
+|RAR Archive (rar)|52 61 72 21|
+|Wave (wav)|57 41 56 45|
+|AVI (avi)|41 56 49 20|
+|Real Audio (ram)|2E 72 61 FD|
+|Real Media (rm)|2E 52 4D 46|
+|MPEG (mpg)|00 00 01 BA|
+|MPEG (mpg)|00 00 01 B3|
+|Quicktime (mov)|6D 6F 6F 76|
+|Windows Media (asf)|30 26 B2 75 8E 66 CF 11|
+|MIDI (mid)|4D 54 68 64|
 
 ## Q0
 
@@ -43,8 +88,7 @@ print(decrypt(example))
 先分析出现的flag.txt
 很明显的rar压缩，这一堆看似乱码的东西实际上就是原始数据,所以接下来准备还原这个包。
 先把原始数据直接`save as`保存在一个file里，然后随便找一个hex editor打开它。,注意，这里数据的格式是**raw**而不是**ascii**.
-`52 61 72 21`是rar的文件头.(其实也可以和ascii对着看啦)
-用hex editor将它掐头去尾然后保存。尾部删除到boundary分隔符处。
+`52 61 72 21`是rar的文件头.
 
 再分析代码
 aes加密，cbc模式，偏移量IV为`IV = 'QWERTYUIOPASDFGH'`，密钥也是它（由`aes = AES.new(IV, AES.MODE_CBC, IV)`看出）
@@ -52,10 +96,7 @@ aes加密，cbc模式，偏移量IV为`IV = 'QWERTYUIOPASDFGH'`，密钥也是�
 解密得`passwd={No_One_Can_Decrypt_Me}`
 （至于字符集和填充就试吧，字符集是gb2312,填充是ZeroPadding）
 
-于是拿这个password去解压缩
-
-
-
+然后拿这个password去解压缩应该就可以了吧，问题是，我提取出来rar的文件解压缩的时候总是报错文件尾有问题。(这个还没有解决，再看看吧)
 
 ## Q1
 
@@ -105,11 +146,32 @@ sql注入恢复数据吧。
 
 *medium*
 
-简单看一下http,大量的404。然后看后面发现了
+查看http,第一个就看到了metasploit.接着看，大量的404,各种疑似admin之类的，应该是在扫描。
+接着往下看，看到了fl4g.php之类的。看到最后，看到执行了
+
+```php
+GET /?c=phpinfo(); HTTP/1.1
+GET /?c=print_r(gzcompress(file_get_contents(base64_decode(%22aW5kZXgucGhw%22)))); HTTP/1.1 
+GET /?c=print_r(gzcompress(file_get_contents(base64_decode(%22ZmxhZy50eHQ%22)))); HTTP/1.1 
+```
+
+第一个操作是查看phpinfo
+第二,三个操作是print_r()打印，gzcompress()压缩，file_get_contents()Reads entire file into a string, base64解码
+就是把文件内容读成一整行，然后gzip压缩，最后打印
+
+所以我们先解码先看看，得到两个文件名
 
 ```
-3860	14.985263	192.168.1.101	192.168.1.105	HTTP	226	HEAD /.caidao.php.swp HTTP/1.1 
+index.php
+flag.txt
 ```
-菜刀
 
-然后还看到了shell，backdoor之类的，应该是菜刀传马吧。
+按原始数据保存,用hex editor打开,找到这个压缩包的原始数据，如图
+![](img/q4.png)
+
+顺便说下`openssl zlib -d < /tmp/data`这个对openssl的版本好像有要求，反正我没办法用它打开zlib的压缩
+
+然后可以用这个代替`printf "\x1f\x8b\x08\x00\x00\x00\x00\x00" |cat - /tmp/data |gzip -dc >/tmp/out`
+虽然执行之后会报"gzip: stdin: unexpected end of file"
+但是不影响，`cat flag.txt`(我输出到这个里面了)
+可以看到`hitctf{85b0ae3a8a708b927bf1a30dff3c6540}`
