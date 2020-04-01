@@ -157,7 +157,14 @@ GET /?c=print_r(gzcompress(file_get_contents(base64_decode(%22ZmxhZy50eHQ%22))))
 
 第一个操作是查看phpinfo
 第二,三个操作是print_r()打印，gzcompress()压缩，file_get_contents()Reads entire file into a string, base64解码
-就是把文件内容读成一整行，然后gzip压缩，最后打印
+就是把文件内容读成一整行，然后gz压缩，最后打印
+
+> gzip, zip and zlib
+> [参考](https://stackoverflow.com/questions/20762094/how-are-zlib-gzip-and-zip-related-what-do-they-have-in-common-and-how-are-they)
+> .zip is an archive format using Deflate compression method.
+> .gz gzip format is for single files, also using Deflate compression method. Often gzip is used in combination with tar, as .tar.gz.
+> zlib library provides Deflate compression and decompression code for use by zip, gzip, png and many other applications.
+
 
 所以我们先解码先看看，得到两个文件名
 
