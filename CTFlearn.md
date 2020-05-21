@@ -165,6 +165,43 @@ By the way, you can also use `HEAD^` to reset the last version. Because HEAD mea
 
 Then you can `cat flag.txt` and get the flag.
 
+#### Milk's Best Friend
+
+*Medium*
+
+Discription:
+There's nothing I love more than oreos, lions, and winning. https://mega.nz/#!DC5F2KgR!P8UotyST_6n2iW5BS1yYnum8KnU0-2Amw2nq3UoMq0Y Have Fun :)
+
+`binwalk oreo.jpg`, we can find that there is a jpeg, a rar.
+`binwalk --extract --dd=".*" oreo.jpg` to extract the rar.
+Open the rar, you can find `a` , an ASCII text, `cat a` but it is not the flag.
+So 'vim b.jpg' and '?flag', so we can get the flag.
+
+#### Digital Camouflage
+
+*Medium*
+
+Discription:We need to gain access to some routers. Let's try and see if we can find the password in the captured network data: https://mega.nz/#!XDBDRAQD!4jRcJvAhMkaVaZCOT3z3zkyHre2KHfmkbCN5lYpiEoY
+Hint 1: It looks like someone logged in with their password earlier. Where would log in data be located in a network capture?
+Hint 2: If you think you found the flag, but it doesn't work, consider that the data may be encrypted.
+
+
+As the hint goes, we know it's the traffic of a router and we need to find the password on it's web page.
+So track the HTTP stream, we can the a POST request, and
+
+```
+0000   08 00 27 3d 47 5d 08 00 27 38 2c 5c 08 00 45 00   ..'=G]..'8,\..E.
+0010   00 5f 2f 71 40 00 40 06 f7 22 0a 00 00 05 0a 00   ._/q@.@.÷"......
+0020   00 01 e7 47 1f 90 89 7d 28 cc 77 ab 43 98 80 18   ..çG...}(Ìw«C...
+0030   01 c9 03 3a 00 00 01 01 08 0a 00 0f 08 27 00 0f   .É.:.........'..
+0040   26 52 75 73 65 72 69 64 3d 68 61 72 64 61 77 61   &Ruserid=hardawa
+0050   79 6e 26 70 73 77 72 64 3d 55 45 46 77 5a 48 4e   yn&pswrd=UEFwZHN
+0060   71 55 6c 52 68 5a 51 25 33 44 25 33 44            qUlRhZQ%3D%3D
+```
+Here we get the password which is URL encoded `UEFwZHNqUlRhZQ%3D%3D`
+Decode it we can get `UEFwZHNqUlRhZQ==` (Actually, I get the all the chars in lower case, but it should be case sensitive, so replace the `%3D` with `=`)
+Decode it with base64, we can get `PApdsjRTae`, that is the flag
+
 ## Cryptography 
 
 ### Character Encoding
