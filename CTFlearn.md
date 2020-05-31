@@ -1,6 +1,46 @@
 # CTFlearn
 
-[TOC]
+
+<!-- vim-markdown-toc GFM -->
+
+* [Forensics](#forensics)
+	* [Pics](#pics)
+		* [General skills](#general-skills)
+		* [Forensics 101](#forensics-101)
+		* [Binwalk](#binwalk)
+		* [WOW.... So Meta](#wow-so-meta)
+		* [07601](#07601)
+		* [Up For A Little Challenge?](#up-for-a-little-challenge)
+		* [The adventures of Boris Ivanov. Part 1.](#the-adventures-of-boris-ivanov-part-1)
+		* [The Keymaker](#the-keymaker)
+* [2. JPEG header comments](#2-jpeg-header-comments)
+* [|EOI|0xd9|End of Image|](#eoi0xd9end-of-image)
+	* [Zips or other files](#zips-or-other-files)
+		* [General skills](#general-skills-1)
+		* [Taking LS](#taking-ls)
+		* [A CAPture of a Flag](#a-capture-of-a-flag)
+		* [Git Is Good](#git-is-good)
+		* [Milk's Best Friend](#milks-best-friend)
+		* [Digital Camouflage](#digital-camouflage)
+* [Cryptography](#cryptography)
+	* [Character Encoding](#character-encoding)
+	* [Hextroadinary](#hextroadinary)
+	* [Base 2 2 the 6](#base-2-2-the-6)
+	* [BruXOR](#bruxor)
+	* [Reverse Polarity](#reverse-polarity)
+	* [Vigenere Cipher](#vigenere-cipher)
+	* [Morse Code](#morse-code)
+	* [HyperStream Test #2](#hyperstream-test-2)
+* [Web](#web)
+	* [Basic Injection](#basic-injection)
+	* [POST Practice](#post-practice)
+	* [Prehashbrown](#prehashbrown)
+	* [Don't Bump Your Head(er)](#dont-bump-your-header)
+	* [Inj3ction Time](#inj3ction-time)
+* [Binary](#binary)
+	* [Lazy Game Challenge](#lazy-game-challenge)
+
+<!-- vim-markdown-toc -->
 
 ## Forensics
 
@@ -111,6 +151,70 @@ Yes, we can find a password.
 
 Now we get a `skycoder.jpg`. We open it and find the flag at the bottom of the pic.
 (The string is not clear actually, I use stegsolve to XOR, and it's fine)
+
+####The adventures of Boris Ivanov. Part 1.
+
+*medium*
+
+Discription:The KGB agent Boris Ivanov got information about an attempt to sell classified data. He quickly reacted and intercepted the correspondence. Help Boris understand what exactly they were trying to sell. Here is the interception data: https://mega.nz/#!HfAHmKQb!zg6EPqfwes1bBDCjx7-ZFR_0O0-GtGg2Mrn56l5LCkE
+
+As we look at the pic, we can find the bar at the bottom, flag must be there. Maybe it's related to offset, I guess.
+
+Try to use stegsolve simply, choose analyse > stereogram solver and you can see the flag att offset 102
+
+#### The Keymaker
+
+*medium*
+
+Discription:Jpeg comments can be very interesting.
+
+----
+First, let's see what's jpeg comments.
+
+reference:
+https://www.scootersoftware.com/vbulletin/forum/beyond-compare-4-discussion/general/14227-jpeg-exif-comments-vs-jpeg-header-comments
+
+With JPEG images there are two different types of comments that can be edited within the file metadata:
+1. EXIF comments
+2. JPEG header comments
+----
+
+Let's use vim, we can see `CTFlearn{TheKeymakerIsK00l}` , but when we submit it, it isn't the flag.
+And `b3BlbnNzbCBlbmMgLWQgLWFlcy0yNTYtY2JjIC1pdiBTT0YwIC1LIFNPUyAtaW4gZmxhZy5lbmMgLW91dCBmbGFnIC1iYXNlNjQKCml2IGRvZXMgbm90IGluY2x1ZGUgdGhlIG1hcmtlciBvciBsZW5ndGggb2YgU09GMAoKa2V5IGRvZXMgbm90IGluY2x1ZGUgdGhlIFMwUyBtYXJrZXIKCg==`
+Base64 decode it, we can get
+
+```
+openssl enc -d -aes-256-cbc -iv SOF0 -K SOS -in flag.enc -out flag -base64
+
+iv does not include the marker or length of SOF0
+
+key does not include the S0S marker
+
+```
+
+----
+
+A JPEG file is partitioned by markers. Each marker is immediately preceded by an all 1 byte (0xff). Although there are more markers, We will discuss the following markers:
+
+|Marker Name|Marker Identifier|Description|
+|---|---|---|
+|SOI|0xd8|Start of Image|
+|APP0|0xe0|JFIF application segment|
+|APPn|0xe1 – 0xef|Other APP segments|
+|DQT|0xdb|Quantization Table|
+|SOF0|0xc0|Start of Frame|
+|DHT|0xc4|Huffman Table|
+|SOS|0xda|Start of Scan|
+|EOI|0xd9|End of Image|
+----
+
+This the progress to decode(-d) flag.enc and get flag.
+So, we also need `flag.enc` to decode and get `flag`. But now, we only have the jpeg. 
+Let's think about the jpeg comment. `imagemagick` has a command line tool named `identify` to find image metadata.(You can install imagemagick using apt)
+`identify -verbose image.png` to check metadata.
+We can find `comment: mmtaSHhAsK9pLMepyFDl37UTXQT0CMltZk7+4Kaa1svo5vqb6JuczUqQGFJYiycY`
+It's valid for base64, although the result is not ascii.
+`echo mmtaSHhAsK9pLMepyFDl37UTXQT0CMltZk7+4Kaa1svo5vqb6JuczUqQGFJYiycY | base64 -d  >> key`
 
 ### Zips or other files
 
@@ -418,6 +522,12 @@ Content-Length: 81
 Here is your flag: flag{did_this_m3ss_with_y0ur_h34d}
 <!-- Sup3rS3cr3tAg3nt  -->
 ```
+
+### Inj3ction Time
+
+*Hard*
+
+Discription:I stumbled upon this website: http://web.ctflearn.com/web8/ and I think they have the flag in their somewhere. UNION might be a helpful command
 
 ## Binary
 
