@@ -3,12 +3,12 @@
 
 <!-- vim-markdown-toc GFM -->
 
-			* [Training: Get Sourced](#training-get-sourced)
-			* [Training: Stegano 1](#training-stegano-1)
-			* [Crypto - Caesar I](#crypto---caesar-i)
-* [](#)
-			* [Training: MySQL I (MySQL, Exploit, Training)](#training-mysql-i-mysql-exploit-training)
-			* [PHP My Admin (Research)](#php-my-admin-research)
+* [Training: Get Sourced](#training-get-sourced)
+* [Training: Stegano 1](#training-stegano-1)
+* [Crypto - Caesar I](#crypto---caesar-i)
+* [Training: Crypto - Caesar II](#training-crypto---caesar-ii)
+* [Training: MySQL I (MySQL, Exploit, Training)](#training-mysql-i-mysql-exploit-training)
+* [PHP My Admin (Research)](#php-my-admin-research)
 
 <!-- vim-markdown-toc -->
 
@@ -28,7 +28,7 @@ So the answer should be `steganoI`
 The key is 6.
 The plaintext is "the quick brown fox jumps over the lazy dog of caesar and your unique solution is mimamgffoprm"
 
-##
+## Training: Crypto - Caesar II
 
 Caesar + ascii -> ascii shift cipher
 
