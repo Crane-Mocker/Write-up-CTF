@@ -14,6 +14,8 @@
 * [Training: WWW-Robots](#training-www-robots)
 * [Training: ASCII](#training-ascii)
 * [Encodings: URL](#encodings-url)
+* [Training: Encodings I](#training-encodings-i)
+* [Prime Factory: Math](#prime-factory-math)
 
 <!-- vim-markdown-toc -->
 
@@ -129,3 +131,16 @@ Just decode it `Yippeh! Your URL is challenge/training/encodings/url/saw_lotion.
 `
 Then, visit this url
 
+## Training: Encodings I
+
+There are lots of 1 and 0. And the answer should be a string in English. So there are large possibility it should be bin to ascii.
+For ascii, there are 7 or 8 digits to represent 127 or 255 chars.
+First, use the jar to put the message in binary format, BitsPerBlock: 7.
+And then bin to ascii.
+
+## Prime Factory: Math
+To find the two numbers, I wrote a little python3 program, `prime_factory.py`	
+It's inside this dir too. Run it and get the results:
+
+> one result is:1000033
+> one result is:1000037
