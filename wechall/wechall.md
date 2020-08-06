@@ -19,6 +19,7 @@
 * [Training: Regex (Training, Regex)](#training-regex-training-regex)
 * [Training: PHP LFI (Exploit, PHP, Training)](#training-php-lfi-exploit-php-training)
 * [Here we know it has `include()`, <font color="blue">The include statement includes and evaluates the specified file.</font> and `eval() the line 1`](#here-we-know-it-has-include-font-colorbluethe-include-statement-includes-and-evaluates-the-specified-filefont-and-eval-the-line-1)
+* [PHP 0817 (PHP, Exploit)](#php-0817-php-exploit)
 
 <!-- vim-markdown-toc -->
 
@@ -184,3 +185,9 @@ As the highlight code shows, it includes and evaluates the $filename, whether th
 (So as you can see, the defualt page `index.php` actually shows `?file=welcome`, the `welcome.html`)
 As the hint goes, we should run `../solution.php`, `../` means the parent directory of `pages/`(The path should be like `lfi/up/pages/`, the `welcome.html`and so on is under the dir `pages/`). So when using `?file=`, it should be `?file=../../solution.php`. And it adds `.html`, so using `%00`to end the statement.(Because the PHP core is implement by C. When connectiong strings, null byte `\x00` will be used as the end of string.)
 The payload should be `?file=../../solution.php%00`
+
+## PHP 0817 (PHP, Exploit)
+
+In PHP, `echo (int)"string";`, will return `0`. And there is no `break;` in case 0 and 1 so it will execute case 2.
+
+Payload: `?which=solution`
