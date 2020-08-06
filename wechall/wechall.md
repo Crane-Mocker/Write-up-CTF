@@ -15,7 +15,10 @@
 * [Training: ASCII](#training-ascii)
 * [Encodings: URL](#encodings-url)
 * [Training: Encodings I](#training-encodings-i)
-* [Prime Factory: Math](#prime-factory-math)
+* [Prime Factory (Math)](#prime-factory-math)
+* [Training: Regex (Training, Regex)](#training-regex-training-regex)
+* [Training: PHP LFI (Exploit, PHP, Training)](#training-php-lfi-exploit-php-training)
+* [Here we know it has `include()`, <font color="blue">The include statement includes and evaluates the specified file.</font> and `eval() the line 1`](#here-we-know-it-has-include-font-colorbluethe-include-statement-includes-and-evaluates-the-specified-filefont-and-eval-the-line-1)
 
 <!-- vim-markdown-toc -->
 
@@ -138,9 +141,46 @@ For ascii, there are 7 or 8 digits to represent 127 or 255 chars.
 First, use the jar to put the message in binary format, BitsPerBlock: 7.
 And then bin to ascii.
 
-## Prime Factory: Math
+## Prime Factory (Math)
 To find the two numbers, I wrote a little python3 program, `prime_factory.py`	
 It's inside this dir too. Run it and get the results:
 
 > one result is:1000033
 > one result is:1000037
+
+## Training: Regex (Training, Regex)
+
+The delimiter is `/`
+
+Check the [syntax](https://www.rexegg.com/regex-quickstart.html).
+
+level 1: The empty string should be `/^$/`. Because there is nothing between ^ and $.
+level 2: A regular expression that matches only the string 'wechall' without quotes `/^wechall$/`
+level 3: Your pattern shall match all images with the name wechall.ext or wechall4.ext and a valid image extension.Valid image extensions are .jpg, .gif, .tiff, .bmp and .png.
+`/^wechall4?\.(?:jpg|gif|tiff|bmp|png)$/` Because wechall or wechall4 can be expressed as `wechall4?`,`.` is expressed as `\.` and choose one from the extension can be expressed as `?: |`
+<font color="red">`(...)` means match and capture,`(?:...)`means match but not capture. </font>
+level 4: Capture the filename, without extension `/^(wechall4?)\.(?:jpg|gif|tiff|bmp|png)$/`, because the only difference between level 3 and level 4 is that, in level 3 you should capture.
+
+## Training: PHP LFI (Exploit, PHP, Training)
+
+Here we know there is an LFI vuln. But in real world pentest, we can often test like this
+
+----
+fist, using `../`to check if there is LFI vuln. We use `?file=..`here and we got 
+```
+PHP Warning(2): include(pages/../.html): failed to open stream: No such file or directory in /home/wechall/www/wc5/www/challenge/training/php/lfi/up/index.php(54) : eval()'d code line 1
+PHP Warning(2): include(): Failed opening 'pages/../.html' for inclusion (include_path='.:/usr/share/php') in /home/wechall/www/wc5/www/challenge/training/php/lfi/up/index.php(54) : eval()'d code line 1
+```
+Here we know it has `include()`, <font color="blue">The include statement includes and evaluates the specified file.</font> and `eval() the line 1`
+----
+
+```php
+$code = '$filename = \'pages/\'.(isset($_GET["file"])?$_GET["file"]:"welcome").\'.html\';';
+$code_emulate_pnb = '$filename = Common::substrUntil($filename, "\\0");'; # Emulate Poison Null Byte for PHP>=5.3.4
+$code2 = 'include $filename;';
+```
+
+As the highlight code shows, it includes and evaluates the $filename, whether the thing after `?file=` or `welcome`. And it adds `'.html'`.
+(So as you can see, the defualt page `index.php` actually shows `?file=welcome`, the `welcome.html`)
+As the hint goes, we should run `../solution.php`, `../` means the parent directory of `pages/`(The path should be like `lfi/up/pages/`, the `welcome.html`and so on is under the dir `pages/`). So when using `?file=`, it should be `?file=../../solution.php`. And it adds `.html`, so using `%00`to end the statement.(Because the PHP core is implement by C. When connectiong strings, null byte `\x00` will be used as the end of string.)
+The payload should be `?file=../../solution.php%00`
