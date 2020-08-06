@@ -20,6 +20,8 @@
 * [Training: PHP LFI (Exploit, PHP, Training)](#training-php-lfi-exploit-php-training)
 * [Here we know it has `include()`, <font color="blue">The include statement includes and evaluates the specified file.</font> and `eval() the line 1`](#here-we-know-it-has-include-font-colorbluethe-include-statement-includes-and-evaluates-the-specified-filefont-and-eval-the-line-1)
 * [PHP 0817 (PHP, Exploit)](#php-0817-php-exploit)
+* [Crypto - Transposition I (Crypto, Training)](#crypto---transposition-i-crypto-training)
+* [Crypto - Substitution I (Crypto, Training)](#crypto---substitution-i-crypto-training)
 
 <!-- vim-markdown-toc -->
 
@@ -191,3 +193,25 @@ The payload should be `?file=../../solution.php%00`
 In PHP, `echo (int)"string";`, will return `0`. And there is no `break;` in case 0 and 1 so it will execute case 2.
 
 Payload: `?which=solution`
+
+## Crypto - Transposition I (Crypto, Training)
+
+oWdnreuf.lY uoc nar ae dht eemssga eaw yebttrew eh nht eelttre sra enic roertco drre . Ihtni koy uowlu dilekt  oes eoyrup sawsro don:wh nfhdccmibh.r
+
+You can see, it looks like "wonderful..."
+The two characters near each other change the position.
+Using `transposition_1.py` to decode, and you can see:
+> Wonderful. You can read the message way better when the letters are in correct order. I think you would like to see your password now: hfndhccimhbr.
+
+## Crypto - Substitution I (Crypto, Training)
+
+As the hint goes, it will be a kind of monoalphabetic cipher.
+Caesar cipher is also a kind of monoalphabetic cipher.It is a substitution cipher in which for a given key, the cipher alphabet for each plain alphabet is fixed throughout the encryption process. 
+So the letters will have the certain frequency.(But truely, I failed by doing so)
+
+QH ZSP RABFLSZH LEO HEG DRU TPRO ZSFY BH VTFPUO F RB FBKTPYYPO CPTH JPAA OEUP HEGT YEAGZFEU WPH FY RTBBQDOAFOAV ZSFY AFZZAP DSRAAPULP JRY UEZ ZEE SRTO JRY FZ
+`F RB`,the format looks like `I AM`
+Using quipquip.com and `RB=AM`as clue
+The plaintext is `BY THE ALMIGHTY GOD YOU CAN READ THIS MY FRIEND I AM IMPRESSED VERY WELL DONE YOUR SOLUTION KEY IS ARMMBCDLIDLF THIS LITTLE CHALLENGE WAS NOT TOO HARD WAS IT`
+
+Here is a detailed [wp](http://m.blog.naver.com/dual5651/60131688181) by a korean.
