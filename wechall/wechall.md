@@ -22,6 +22,8 @@
 * [PHP 0817 (PHP, Exploit)](#php-0817-php-exploit)
 * [Crypto - Transposition I (Crypto, Training)](#crypto---transposition-i-crypto-training)
 * [Crypto - Substitution I (Crypto, Training)](#crypto---substitution-i-crypto-training)
+* [Auth me(HTTP, Training)](#auth-mehttp-training)
+* [Training: Baconian (Stegano, Encoding, Crypto, Training)](#training-baconian-stegano-encoding-crypto-training)
 
 <!-- vim-markdown-toc -->
 
@@ -215,3 +217,63 @@ Using quipquip.com and `RB=AM`as clue
 The plaintext is `BY THE ALMIGHTY GOD YOU CAN READ THIS MY FRIEND I AM IMPRESSED VERY WELL DONE YOUR SOLUTION KEY IS ARMMBCDLIDLF THIS LITTLE CHALLENGE WAS NOT TOO HARD WAS IT`
 
 Here is a detailed [wp](http://m.blog.naver.com/dual5651/60131688181) by a korean.
+
+## Auth me(HTTP, Training)
+
+Look at the apache.conf
+
+```
+<VirtualHost *:443>
+        ServerName authme.wechall.net #the domain
+        DocumentRoot /home/wechall/www/wc5/www
+        GnuTLSEnable on #TLS, so here are some certifications needed
+        GnuTLSCertificateFile /etc/pki_jungle/authme/certs/server.crt
+        GnuTLSKeyFile /etc/pki_jungle/authme/private/server.key
+        GnuTLSClientCAFile /etc/pki_jungle/authme/certs/client_bundle.crt
+        GnuTLSPriorities NORMAL:!AES-256-CBC:%COMPAT
+        GnuTLSClientVerify require
+        <Directory "/home/wechall/www/wc5/www">
+                GnuTLSClientVerify require
+                Options Indexes FollowSymLinks
+                AllowOverride All
+        </Directory>
+        <Directory "/home/wechall/www/wc5/www/challenge/space">
+                GnuTLSClientVerify require
+                Options Indexes FollowSymLinks
+                AllowOverride None
+        </Directory>
+        AssignUserID wechall wechall
+        ErrorLog /home/wechall/www/auth_me.errors.log
+        CustomLog /home/wechall/www/auth_me.access.log combined
+</VirtualHost>
+```
+
+So as we can see, the conf is about the virtual host whose domain is `authme.wechall.net`. It uses TLS, some certifications are needed.
+
+Then visit https://authme.wechall.net/challenge/space/auth_me/www/index.php, and you can see `ERR_BAD_SSL_CLIENT_AUTH_CERT`, certs are needed.
+
+Then go back at the conf, we notice that the url looks interesting `http://www.wechall.net/challenge/space/auth_me/find_me/apache.conf`
+Click `http://www.wechall.net/challenge/space/auth_me/find_me/`
+Then we can find the things we need.
+Download them. Try to import it to Chrome, only client.p12 can be imported. Then visit the box again.
+
+## Training: Baconian (Stegano, Encoding, Crypto, Training)
+
+There are only 2 kinds of chars in Bacon cipher. In the message, it should be the lower and upper case.
+
+There result is (the programs `baconian.py` are in the wechall_material dir)
+> bababaabaabaaabbbaaababbbbabbaaabaaababbababbbabbbaaabbabbbaabbabaabaababbbaababaabaaababbababbabbbababbababbbaabbbaaaaaaaabaababaaabaabaaabbabbbbaabbaabbbaabaababbbbaabaaabaaaaababaaabaabaabaabbbabbbababaaabaabbaaababbaabbbabaaabaaabbbabbbabaaabaabababbbbaaababbbbababbabaaabaaabaabaaaaaaaabbbaaaaaaabbabaabbaabbabbabbbbabbbabababababaabababababbababaabababaabbababbbababaababbbababaababbabbabaababababbababbababaabaaababbabbabbabbababababaabababbabaababbabbaabaababababaababababaabaababbabababababbababababbbababbabababbabaabaababbababaabbabababbaabaabbabbaabaabbaabaabababababbababababaababababaabaababababaabbababababbaabaabaababaabababbabaabababbaabaababaabababaababbaababababaabbabbabababababbababababababababbaabababaabbababaabaabbbaaabaabababbabbababababaabababaabababbaababababababababababababaabbabbababbabababbaababababbabaabbbabbababababababababaabbabababaababbbabaababababbabababaabbabaababbaabababaabaababababbababababaabababbaabababaabaabababaababbababaabaababababbabababababababbabbabaababababaabaabbabaabaabaababaabababababaabababaababababbbababababbabababababbabababababbabababbabbababbabababbabaababbababaabaabababababaababababbaabbabaabbbabbabbababbaababaabaababababaabbaabababababaababaabbabbaababababaabababababababbabababababbaababababbabababbabbabababbaabaababaabababbabbaababbaababaabaabababababaabababbabababbaabababababaabababbaababaababababbababbabababbabbaabbabbababbabbabaabaababababbbababaabababaabbabaabaababbababab
+
+But using a bacon-cipher decoder, it cannot give a right answer.
+As the hint goes, the decode method should be given by wiki, so write another short program.(baconian1.py)
+
+As you run my program, you can find that there are some unit not fit the chart. That's why you can't decode the ciphertext directly by a decoder.
+
+> veryxwellxdonexfellowxhackerxthexecretxkeywordxixrplireaoangnxxkvfkujouwkwwurnwvfnfwjkvewvlkxlkjnjvmtmtevlkuvjfknkzeuvuvkkzktnkwvkvuoevwvjkkzkvkvjwwvvuvkvjvjovvjuwkkwvjlfjfjnjflkvlnfkjukkvfjkkvnkwvwwvuwuvjkzuwwkjktfktmvjkvnkwkwvwvkkfkvfnlfkwkkwwvwnvwkxkktjfv
+
+Here are some extra x, so delete it by changing `text+='x'` to `text+=" "` and run it again.
+
+Then you can get
+> very well done fellow hacker the ecret keyword i rplireaoangn  kvfkujouwkwwurnwvfnfwjkvewvlk lkjnjvmtmtevlkuvjfknkzeuvuvkkzktnkwvkvuoevwvjkkzkvkvjwwvvuvkvjvjovvjuwkkwvjlfjfjnjflkvlnfkjukkvfjkkvnkwvwwvuwuvjkzuwwkjktfktmvjkvnkwkwvwvkkfkvfnlfkwkkwwvwnvwk kktjfv
+
+So the flag for me is "rplireaoangn"
