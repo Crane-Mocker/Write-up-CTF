@@ -24,6 +24,9 @@
 * [Crypto - Substitution I (Crypto, Training)](#crypto---substitution-i-crypto-training)
 * [Auth me(HTTP, Training)](#auth-mehttp-training)
 * [Training: Baconian (Stegano, Encoding, Crypto, Training)](#training-baconian-stegano-encoding-crypto-training)
+* [hi (Math)](#hi-math)
+* [Training: LSB (Stegano, Image, Training)](#training-lsb-stegano-image-training)
+* [Training: GPG (Crypto, Training)](#training-gpg-crypto-training)
 
 <!-- vim-markdown-toc -->
 
@@ -277,3 +280,36 @@ Then you can get
 > very well done fellow hacker the ecret keyword i rplireaoangn  kvfkujouwkwwurnwvfnfwjkvewvlk lkjnjvmtmtevlkuvjfknkzeuvuvkkzktnkwvkvuoevwvjkkzkvkvjwwvvuvkvjvjovvjuwkkwvjlfjfjnjflkvlnfkjukkvfjkkvnkwvwwvuwuvjkzuwwkjktfktmvjkvnkwkwvwvkkfkvfnlfkwkkwwvwnvwk kktjfv
 
 So the flag for me is "rplireaoangn"
+
+## hi (Math) 
+`(2+17591026060782)*17591026060781/2`
+The result is 154722098935564539692256152
+
+## Training: LSB (Stegano, Image, Training)
+Using stegsolve, in Green plane 1, I can see the flag
+
+## Training: GPG (Crypto, Training) 
+`gpg --gen-key` to generate a gpg key.
+`gpg --list-secret-keys --keyid-format LONG` to list the keys.
+<font color="blue">Here, `--list-keys` can check the information of public keys, `--list-secret-keys` can check the information of secret keys, `--list-signatures` can list signatures</font>
+Then you can see the ID of the keys after `sec */`
+`gpg --armor --export ID` to print the GPG key in ascii armor format.
+<font color="blue">Here `--armor` means in ascii format, `--export` has the ID after it, you can also add `--output pubkey`</font>
+
+After upload the public key to wechall, you can receive an e-mail.
+Copy and past it to a new file, for example "file1".
+Adjust the format into
+
+```
+-----BEGIN PGP MESSAGE----- 
+Version: GnuPG v2 
+-----END PGP MESSAGE-----
+```
+
+`gpg --output solve1 --decrypt file1` to decrypt file1.
+Then check solve1, we can find it is a html file, a herf is given. Click it.And you can see:
+> Your GPG has been stored and is in use now.
+
+So click "send me encrypted mail please", then we can finally receive the e-mail.
+
+Repeat the steps to decrypt it. It is a html file again, we can see flag in the file.
