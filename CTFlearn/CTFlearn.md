@@ -15,6 +15,7 @@
 		* [The Keymaker](#the-keymaker)
 * [2. JPEG header comments](#2-jpeg-header-comments)
 * [|EOI|0xd9|End of Image|](#eoi0xd9end-of-image)
+		* [Exclusive Santa](#exclusive-santa)
 	* [Zips or other files](#zips-or-other-files)
 		* [General skills](#general-skills-1)
 		* [Taking LS](#taking-ls)
@@ -39,6 +40,8 @@
 	* [Inj3ction Time](#inj3ction-time)
 * [Binary](#binary)
 	* [Lazy Game Challenge](#lazy-game-challenge)
+* [Misc](#misc)
+	* [Help Bity](#help-bity)
 
 <!-- vim-markdown-toc -->
 
@@ -215,6 +218,17 @@ Let's think about the jpeg comment. `imagemagick` has a command line tool named 
 We can find `comment: mmtaSHhAsK9pLMepyFDl37UTXQT0CMltZk7+4Kaa1svo5vqb6JuczUqQGFJYiycY`
 It's valid for base64, although the result is not ascii.
 `echo mmtaSHhAsK9pLMepyFDl37UTXQT0CMltZk7+4Kaa1svo5vqb6JuczUqQGFJYiycY | base64 -d  >> key`
+
+#### Exclusive Santa
+
+There are 1.png and 2.png in the rar.
+Use binwalk and there are some other things in the 2 pics.
+`binwalk --extract --dd=".*" x.png` to extract them.
+
+For 1.png, there are a png `0` and a ms color profile `36`and some others.
+For 2.png, there are 2 png pics, `0` and `CCB6`
+
+Look at `36` and `CCB6`, they look alike. Use stegsolve `analyse>image combiner` and you can see the reflection of the flag.
 
 ### Zips or other files
 
@@ -541,3 +555,24 @@ I found an interesting game made by some guy named "John_123". It is some bettin
 To get flag, pwn the server at `nc thekidofarcrania.com 10001`
 
 The key point is that it's hard to win, so when you place a bet, input a negative number (for example: -1000000000) and then you can loose the game as you like it. Each time you loose a game, you gain some money. And when the game ends, you will get the flag.
+
+## Misc
+
+### Help Bity
+
+*Middle*
+
+Discription:
+Bity had the flag for his problem. Unfortunately, his negative friend Noty corrupted it. Help Bity retrieve his flag. He only remembers the first 4 characters of the flag: CTFL. Flag: BUGMdsozc0osx^0r^`vdr1ld|
+
+The plain text: CTFL
+The cipher text: BUGM
+The order is "BC" "TU" "FG" "LM", so maybe it's xor.
+Write a simple python program help_bity.py to solve it, then get `CTFLern{b1nry_1s_awes0me}`
+But the flag isn't right, someone said that it is because the HTML show it in a wrong way. The ciphertext should be 
+
+```
+BUGMd`sozc0o`sx^0r^`vdr1ld|
+```
+
+Using this, finally I got the right flag.
