@@ -13,9 +13,14 @@
 		* [Up For A Little Challenge?](#up-for-a-little-challenge)
 		* [The adventures of Boris Ivanov. Part 1.](#the-adventures-of-boris-ivanov-part-1)
 		* [The Keymaker](#the-keymaker)
-* [2. JPEG header comments](#2-jpeg-header-comments)
 * [|EOI|0xd9|End of Image|](#eoi0xd9end-of-image)
 		* [Exclusive Santa](#exclusive-santa)
+		* [MountainMan](#mountainman)
+		* [ShahOfGimli](#shahofgimli)
+		* [Exif](#exif)
+		* [Rubber Duck](#rubber-duck)
+		* [Snowboard](#snowboard)
+		* [PikesPeak](#pikespeak)
 	* [Zips or other files](#zips-or-other-files)
 		* [General skills](#general-skills-1)
 		* [Taking LS](#taking-ls)
@@ -42,6 +47,8 @@
 	* [Lazy Game Challenge](#lazy-game-challenge)
 * [Misc](#misc)
 	* [Help Bity](#help-bity)
+* [Programming](#programming)
+		* [Simple Programming](#simple-programming)
 
 <!-- vim-markdown-toc -->
 
@@ -178,8 +185,9 @@ reference:
 https://www.scootersoftware.com/vbulletin/forum/beyond-compare-4-discussion/general/14227-jpeg-exif-comments-vs-jpeg-header-comments
 
 With JPEG images there are two different types of comments that can be edited within the file metadata:
-1. EXIF comments
-2. JPEG header comments
+1.EXIF comments
+2.JPEG header comments
+
 ----
 
 Let's use vim, we can see `CTFlearn{TheKeymakerIsK00l}` , but when we submit it, it isn't the flag.
@@ -229,6 +237,130 @@ For 1.png, there are a png `0` and a ms color profile `36`and some others.
 For 2.png, there are 2 png pics, `0` and `CCB6`
 
 Look at `36` and `CCB6`, they look alike. Use stegsolve `analyse>image combiner` and you can see the reflection of the flag.
+
+#### MountainMan
+
+First as the hint goes, we can find two 0xffd9 in the pic.
+
+I first save the other pic which is ended by the first 0xffd9. And use stegsolve to combine them to do XOR, ofc it will fail, because their hex are almost the seem.
+
+Then maybe the flag is in between of the two end markers.
+
+```
+88 9F 8D A7 AE AA B9 A5 B0 9E A9 BE A5 BF BE 94 B9 FB A8 A0 FE B6
+```
+
+Use cyberchef to brute xor.
+First, it's hex, so choose `From Hex`.
+Then choose `magic` to brute xor.
+There should be 22 chars of flag (22 hex numbers), so the depth choose 22 or more.
+The flag should be a string, so the RegEx should be `^\w*{\w*}`.
+Then we get the flag.
+
+#### ShahOfGimli
+
+First use binwalk to extract.
+Look at the pic `0`, `strings 0 > 0.txt`
+There is a flag and some pieces of text look like from base64.
+
+The flag is `CTFlearn{Gimli_Was_Part_Of_The_Fellowship_Of_The_Ring}`. It's not the right flag.
+
+The plaintxt is
+
+```
+CTFlearn{Gimli.Is.A.Dwarf}
+
+Who is Gimli?  You can learn more about Gimli here:
+https://lotr.fandom.com/wiki/Gimli
+https://en.wikipedia.org/wiki/Gimli_(Middle-earth)
+
+This challenge is based on hash algorithms and encryption.
+
+I am using OPENSSL v1.1.1 to create this challenge.
+
+Here is a reference for using hash calculations with OPENSSL:
+https://www.openssl.org/docs/man1.1.1/man1/openssl-dgst.html
+
+If you are a Python coder, Python provides a hashing library you might find useful:
+https://docs.python.org/3/library/hashlib.html
+
+If this challenge has you wondering what to do next, please try my other challenges
+that are worth fewer points.  The more points, the more difficult the challenge.
+
+If you are new to CTF and/or not quite sure how to solve this challenge,
+you should probably try these other challenges first in this order:
+RubberDuck
+Snowboard
+PikesPeak
+GandalfTheWise
+
+After solving this ShahOfGimli challenge, then try:
+HailCaesar
+MountainMan
+KeyMaker
+VargasIsland
+
+My Twitter DM's are open @kcbowhunter.
+
+----------------------------
+
+The third comment block is encrypted with AES CBC encryption using the following key:
+sha256 hash of the string "CTFlearn"
+
+Note that the comment block is also base64 encoded
+There is no iv but you need to determine how to express this mathematically
+
+If you are new to encryption and hash algorithms here is a good place to start:
+openssl enc -help
+openssl dgst -help
+sha256sum
+
+Of course Google is your friend (if you don't mind them recording all your online activity)
+
+https://wiki.openssl.org/index.php/Enc is a good reference for openssl encryption algorithms
+https://docs.python.org/3/library/hashlib.html
+```
+
+`CTFlearn{Gimli.Is.A.Dwarf}` is also not the right flag.
+
+We notice that `This challenge is based on hash algorithms and encryption. I am using OPENSSL v1.1.1 to create this challenge.`
+
+`file 20517` it is a tar. So `tar -xvf 20517`
+Then we can find Another pic and an enc.
+
+> The third comment block is encrypted with AES CBC encryption using the following key:
+> sha256 hash of the string "CTFlearn"
+
+sha256 of CTFlearn is `B18EF1351FC0DF641ABBE56DCD4928A8BB98452B1B43D8C1C13F1874C8B35056`
+
+Then decode the third block.
+
+```
+CTFlearn{The_Shah_Of_Gimli_Is_The_Key}
+CTFlearn{Gimli_Has_256_Gemstones}
+CTFlearn{Breakfast_Hash_Is_The_Best}
+```
+
+`sha256sum Gimli04Base.jpg` and get `e26db845ae634c7d774f8924a565e34e215b659a97c7e1d01a401fea7c5f6d8`
+
+`openssl enc -d -aes-256-cbc -iv 00000000000000000000000000000000 -K e26db845ae634c7d774f8924a565e34e215b659a97c7e1d01a401fea7c5f6d87 -in flag.enc -out flag -nopad`
+
+#### Exif
+
+`strings Computer-Password-Security-Hacker\ -\ Copy.jpg` and get the flag.
+(Use vim or gedit is also ok)
+
+#### Rubber Duck
+
+Vim and `?CTF`
+
+#### Snowboard
+
+`strings Snowboard.jpg` and base64 decode.
+
+#### PikesPeak
+
+`strings` and flag is one of them
 
 ### Zips or other files
 
@@ -576,3 +708,9 @@ BUGMd`sozc0o`sx^0r^`vdr1ld|
 ```
 
 Using this, finally I got the right flag.
+
+## Programming
+
+#### Simple Programming
+
+Look at simple_programming.py
