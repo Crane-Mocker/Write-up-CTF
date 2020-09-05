@@ -21,6 +21,7 @@
 		* [Rubber Duck](#rubber-duck)
 		* [Snowboard](#snowboard)
 		* [PikesPeak](#pikespeak)
+		* [GandalfTheWise](#gandalfthewise)
 	* [Zips or other files](#zips-or-other-files)
 		* [General skills](#general-skills-1)
 		* [Taking LS](#taking-ls)
@@ -41,6 +42,7 @@
 	* [Basic Injection](#basic-injection)
 	* [POST Practice](#post-practice)
 	* [Prehashbrown](#prehashbrown)
+* [2. `sqlmap -u url  --data="name=value"`](#2-sqlmap--u-url----datanamevalue)
 	* [Don't Bump Your Head(er)](#dont-bump-your-header)
 	* [Inj3ction Time](#inj3ction-time)
 * [Binary](#binary)
@@ -362,6 +364,26 @@ Vim and `?CTF`
 
 `strings` and flag is one of them
 
+#### GandalfTheWise
+
+`strings Gandalf.jpg`
+
+```
++Q1RGbGVhcm57eG9yX2lzX3lvdXJfZnJpZW5kfQo=
++xD6kfO2UrE5SnLQ6WgESK4kvD/Y/rDJPXNU45k/p
++h2riEIj13iAp29VUPmB+TadtZppdw3AuO7JRiDyU
+```
+
+First, find the base64 ciphertext and decode it `CTFlearn{xor_is_your_friend}`
+
+So maybe we should do xor for the next two lines
+As I tried to do it, I still didn't get the flag.
+
+Then we can think that the first line is encoded, the next 2 lines need decode, too.
+
+Use base64 to decode the next 2 line and find that they are hex format,and then xor them.
+Write a short program(GandalfTheWise.py) to solve it.
+
 ### Zips or other files
 
 #### General skills
@@ -601,12 +623,12 @@ So register a new account and login. Now we can see there is a search bar. And a
 
 Seems the search bar is vulnerable. Let's try to run sqlmap.
 
-***
+----
 There are two ways to do POST injection via sqlmap
 
 1. `sqlmap -r xxx.txt` <font color="blue">The xxx.txt is the POST request</font>
 2. `sqlmap -u url  --data="name=value"`
-***
+----
 
 Save the POST request as 1.txt and run sqlmap `sqlmap -r 1.txt --dbs --batch`
 <font color="grey">For some users like me, the param --proxy is necessary.</font>
