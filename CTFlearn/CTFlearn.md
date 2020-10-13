@@ -22,6 +22,8 @@
 		* [Snowboard](#snowboard)
 		* [PikesPeak](#pikespeak)
 		* [GandalfTheWise](#gandalfthewise)
+		* [Naughty Cat](#naughty-cat)
+		* [Smiling ASCII](#smiling-ascii)
 	* [Zips or other files](#zips-or-other-files)
 		* [General skills](#general-skills-1)
 		* [Taking LS](#taking-ls)
@@ -387,6 +389,34 @@ Then we can think that the first line is encoded, the next 2 lines need decode, 
 
 Use base64 to decode the next 2 line and find that they are hex format,and then xor them.
 Write a short program(GandalfTheWise.py) to solve it.
+
+#### Naughty Cat
+
+*medium*
+
+`binwalk --extract --dd=".*" cut3_c4t.png`
+
+The we can see a pic `0`, an mp3 file `purrr_2.mp3`, `28E4B.rar` and `y0u_4r3_cl0s3.rar`
+
+`strings purrr_2.mp3` we can see `is a password here?`(So there must be something as pw here, though I didn't where to use it yet)
+Use audacity to open this mp3 file, check spectrogram and we can see:
+`sp3ctrum_1s_y0ur_fr13nd`
+
+`unrar x y0u_4r3_cl0s3.rar`, it gives an error `y0u_4r3_cl0s3.rar is not RAR archive`.
+`file y0u_4r3_cl0s3.rar` to check its type `data`. So the rar may be broken.
+So open the rar with GHex and edit the head as `52 61 72 21` to fix the broken rar, then save it.
+
+Try to unrar it again, this time it works, a password is needed, the password is `sp3ctrum_1s_y0ur_fr13nd` as we find.
+
+Then we get a txt `f1n4lly.txt`
+Open it with gedit, we can see a cat with some strings, looks like base64.
+Decode `ZjByM241MWNzX21hNXQzcg==`, we can get the flag. (No `U` at the beginning of the string, it's the tail of the cat.)
+
+#### Smiling ASCII
+
+*medium*
+
+`strings smiling.png` we can see a base64 encoded string, decode it and we can get a hint, `Did you know that pixels are, like the ascii table, numbered from 0 to 255?`
 
 ### Zips or other files
 
