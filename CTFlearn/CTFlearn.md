@@ -47,6 +47,7 @@
 * [2. `sqlmap -u url  --data="name=value"`](#2-sqlmap--u-url----datanamevalue)
 		* [Don't Bump Your Head(er)](#dont-bump-your-header)
 		* [Inj3ction Time](#inj3ction-time)
+		* [My Blog](#my-blog)
 * [Binary](#binary)
 		* [Lazy Game Challenge](#lazy-game-challenge)
 		* [Favorite Color](#favorite-color)
@@ -756,6 +757,22 @@ We can see the name of the column in `w0w_y0u_f0und_m3` is `f0und_m3`.
 
 `id=-1 union select f0und_m3,2,3,4 from w0w_y0u_f0und_m3`
 Then we can see the flag.
+
+#### My Blog
+
+*easy*
+
+Discription:
+```
+Hi, I'm Noxtal! I have hidden a flag somewhere in my Cyberworld (AKA blog)... you may find a good <strong>application</strong> for your <strong>memory</strong>. ;)
+```
+
+Search for "application" in devtool in chrome, you can find
+
+```
+<script type="application/ld+json">
+{"headline":"Noxtal’s Cyberworld","sameAs":["https://twitter.com/noxtal_","https://noxtal.com/","https://github.com/noxtal"],"@type":"WebSite","url":"http://noxtal.com//","description":"Hey, I’m Noxtal! I’m a young CTF player and pentester, come check out my blog. On it, I post about everything I like but mostly detailed writeups about cybersecurity challenges I liked for beginners to learn.","name":"Noxtal","@context":"https://schema.org"}</script>
+```
 
 ## Binary
 
