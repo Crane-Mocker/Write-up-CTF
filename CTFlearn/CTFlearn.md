@@ -56,6 +56,8 @@
 * [Misc](#misc)
 		* [Help Bity](#help-bity)
 		* [Rock Paper Scissors](#rock-paper-scissors)
+		* [My Blog](#my-blog-1)
+		* [Substitution Cipher](#substitution-cipher)
 * [Programming](#programming)
 		* [Simple Programming](#simple-programming)
 * [Reverse](#reverse)
@@ -1124,6 +1126,42 @@ Please choose: R / P / S
 Know we know the program chooses the choice of R/P/S by numbers.
 Run it again we can find the numbers are the same. So the choices are the same.
 So we can first choose something for 10 times and record the program's choices. Thus we can win 10 times and get the flag.
+
+#### My Blog
+
+*easy*
+
+Description:
+> Hi, I'm Noxtal! I have hidden a flag somewhere in my Cyberworld (AKA blog)... you may find a good **application** for your **memory.** ;)
+> Note: This is my real website (thus no deadly bug to exploit here). You might want to read some of my content (writeups, tutorials, and cheatsheets). I would be glad to receive any kind of feedback.
+> Click here to access it, have fun checking my blog out! Cheers!
+
+> Hint: replace the flag{} part with CTFlearn{}.
+
+As the description goes, the flag is related to "application" and "memory". So we can guess `F12>application>storage` will be somewhere for the flag.
+
+#### Substitution Cipher
+
+*medium*
+
+Description: Someone gave me this, but I haven't the slightest idea as to what it says! https://mega.nz/#!iCBz2IIL!B7292dJSx1PGXoWhd9oFLk2g0NFqGApBaItI_2Gsp9w Figure it out for me, will ya?
+
+After download, there is a txt. As the description goes, it is just substitution cipher.
+
+At first, we notice that `MIT YSAU OL OYGFSBDGRTKFEKBHMGCALSOQTMIOL.` This long string looks like flag. So the sentence can be `the flag is ...`.
+So we can know the substitution as(ciphertext-plaintext):`a-a`,`i-h`,`l-s`,`m-t`,`o-i`,`s-l`,`t-e`,`u-g`,`y-f`
+But there are the other letters that we don't know their plaintext.
+
+So the frequency anaslysis is helpful here:
+https://crypto.interactive-maths.com/frequency-analysis-breaking-the-code.html
+Put the ciphertext as input and calculate the frequency.
+With the table below, fill in the known pairs at first and fill in the rest then.
+
+notice, here we can find pairs and make substitutions at the same time. For example, here we can easily find `r-d`
+![](pic/00.png)
+
+The result
+![](pic/01.png)
 
 ## Programming
 
